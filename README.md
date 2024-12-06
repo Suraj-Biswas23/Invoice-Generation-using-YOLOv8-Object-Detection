@@ -26,4 +26,4 @@ python invoice_products_yolo.py
 ```
 <br/>
 
-*Note: Install the dependencies in a virtual environment to prevent dependencies from clashing with other projects. You can also try using tensorflow-gpu for good performance by installing the dependency separately.
+*Note: Install the dependencies in a virtual environment to prevent dependencies from clashing with other projects. You can also try using tensorflow-gpu for good performance by installing the dependency separately.*
