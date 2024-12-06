@@ -4,7 +4,8 @@ This project utilizes object detection and classification models to identify pro
 
 ## Screenshots
 
-1. Model Performance:
+**1. Model Performance:**
+
    ![image](https://github.com/user-attachments/assets/0c9f09da-5faa-4090-86d0-37f13eb7bc19)
  
 ## Usage
