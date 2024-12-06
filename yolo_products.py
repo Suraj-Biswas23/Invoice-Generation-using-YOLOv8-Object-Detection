@@ -6,8 +6,16 @@ import tensorflow as tf
 from datetime import datetime
 
 class ProductDetector:
+    """
+    A class that handles the product detection and tracking in real-time using YOLO for object detection 
+    and a custom classification model to identify products and calculate the total bill.
+    """
+    
     def __init__(self):
-        # Product catalog with prices
+        """
+        Initializes the ProductDetector object with the product catalog, YOLO model, product classifier model, 
+        and tracking variables for detected items and total bill.
+        """
         self.product_catalog = {
             'dove shampoo': 185,
             'lays': 10,
@@ -18,43 +26,38 @@ class ProductDetector:
             'timepass biscuit': 25
         }
         
-        # YOLO object detection model
+        # Load YOLO object detection model
         self.detection_model = YOLO('yolov8n.pt')
         
-        # Product classification model
+        # Load product classification model
         self.classification_model = self._load_product_classifier()
         
         # Tracking variables
         self.detected_items = []
         self.total_bill = 0
-        
+
     def _load_product_classifier(self):
-        # Your existing model loading code
-        products_model = tf.keras.Sequential([
-            tf.keras.layers.Conv2D(16, kernel_size=(3, 3), padding='valid', activation='relu', input_shape=(224, 224, 3)),
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=2, padding='valid'),
-            
-            tf.keras.layers.Conv2D(32, kernel_size=(3, 3), padding='valid', activation='relu'),
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=2, padding='valid'),
-            
-            tf.keras.layers.Conv2D(32, kernel_size=(3, 3), padding='valid', activation='relu'),
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.MaxPool2D(pool_size=(2, 2), strides=2, padding='valid'),
-            
-            tf.keras.layers.Flatten(),
-            
-            tf.keras.layers.Dense(256, activation='relu'),
-            tf.keras.layers.Dropout(0.5),
-            tf.keras.layers.Dense(128, activation='relu'),
-            tf.keras.layers.Dropout(0.5),
-            tf.keras.layers.Dense(7, activation='softmax')
-        ])
-        products_model.load_weights('custom_model.h5')
+        """
+        Loads the pre-trained product classification model.
+        
+        Returns:
+            tf.keras.Model: The product classification model.
+        """
+        # Load the entire model (architecture + weights)
+        products_model = tf.keras.models.load_model('full_model.h5')
+        
         return products_model
-    
+
     def _preprocess_image(self, image):
+        """
+        Preprocesses the input image for prediction by resizing and normalizing it.
+
+        Args:
+            image (numpy.ndarray): The input image to preprocess.
+
+        Returns:
+            numpy.ndarray: The preprocessed image ready for classification.
+        """
         target_size = (224, 224)
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         img = cv2.resize(image_rgb, target_size)
@@ -63,6 +66,15 @@ class ProductDetector:
         return img
     
     def _make_square_padded_image(self, image):
+        """
+        Pads the input image to make it square while maintaining the aspect ratio.
+
+        Args:
+            image (numpy.ndarray): The input image to pad.
+
+        Returns:
+            numpy.ndarray: The square padded image.
+        """
         h, w, _ = image.shape
         max_side = max(h, w)
         
@@ -76,25 +88,33 @@ class ProductDetector:
         return square_img
     
     def _draw_invoice_panel(self, img, detected_items, total_bill):
-        height, width, _ = img.shape
-        panel_width = min(400, width // 3)  # Set the panel width to 1/3 of the screen width (or max 400)
+        """
+        Draws the invoice panel on the image displaying the detected items and total bill.
 
-        # Extend the gray space to the entire window
+        Args:
+            img (numpy.ndarray): The input image on which the invoice panel will be drawn.
+            detected_items (list): A list of tuples containing detected items and their prices.
+            total_bill (float): The total amount for the detected items.
+
+        Returns:
+            numpy.ndarray: The image with the invoice panel.
+        """
+        height, width, _ = img.shape
+        panel_width = min(400, width // 3)
+
+        # Create white panel for invoice
         white_panel = np.ones((height, panel_width, 3), dtype=np.uint8) * 255
 
-        # Invoice Header
+        # Add invoice details (header, date, items, total)
         cv2.putText(white_panel, "SMART INVOICE", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 128), 2, cv2.LINE_AA)
-        cv2.line(white_panel, (20, 60), (panel_width - 20, 60), (0, 0, 128), 2)  # Underline
+        cv2.line(white_panel, (20, 60), (panel_width - 20, 60), (0, 0, 128), 2)
 
-        # Date and Time
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cv2.putText(white_panel, current_time, (20, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 1, cv2.LINE_AA)
 
-        # Item List Header
         cv2.putText(white_panel, "Items:", (20, 130), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2, cv2.LINE_AA)
-        cv2.line(white_panel, (20, 150), (panel_width - 20, 150), (0, 0, 0), 1)  # Separator Line
+        cv2.line(white_panel, (20, 150), (panel_width - 20, 150), (0, 0, 0), 1)
 
-        # Item List
         for i, (item, price) in enumerate(detected_items, 1):
             item_text = f"{i}. {item.capitalize()}"
             price_text = f"Rs.{price}"
@@ -102,22 +122,23 @@ class ProductDetector:
             cv2.putText(white_panel, item_text, (20, 160 + i * 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1, cv2.LINE_AA)
             cv2.putText(white_panel, price_text, (panel_width - 100, 160 + i * 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 1, cv2.LINE_AA)
 
-        # Total
         cv2.line(white_panel, (20, height - 100), (panel_width - 20, height - 100), (0, 0, 0), 2)
         total_text = f"TOTAL: Rs.{total_bill}"
         cv2.putText(white_panel, total_text, (20, height - 70), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 128), 2, cv2.LINE_AA)
 
-        # Combine the panel with the original image and ensure the panel is fully visible
         img_with_invoice = np.hstack((img, white_panel))
         combined_width = img_with_invoice.shape[1]
 
-        # Resize the window to fit the combined image width
         cv2.namedWindow("Smart Invoice Detection", cv2.WINDOW_NORMAL)
         cv2.resizeWindow("Smart Invoice Detection", combined_width, height)
 
         return img_with_invoice
 
     def detect_and_track(self):
+        """
+        Detects products in real-time using the webcam and updates the total bill and detected items.
+        Displays the result with a real-time invoice panel showing detected items and the total.
+        """
         cap = cv2.VideoCapture(0)
         cap.set(3, 1280)
         cap.set(4, 720)
@@ -145,7 +166,7 @@ class ProductDetector:
 
                         prediction = self.classification_model.predict(processed_img)
 
-                        if np.max(prediction) > 0.9:
+                        if np.max(prediction) > 0.95:
                             predicted_class_index = np.argmax(prediction)
                             predicted_class = list(self.product_catalog.keys())[predicted_class_index]
 
@@ -172,7 +193,6 @@ class ProductDetector:
 
         cap.release()
         cv2.destroyAllWindows()
-
 
 # Run the detection
 detector = ProductDetector()
