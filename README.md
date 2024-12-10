@@ -21,6 +21,18 @@ Our solution is a Smart Invoice Detection System that leverages advanced compute
      * full_model.h5
      * custom_model.weights.h5
 
+# Approach
+ * Object Detection: Utilized the YOLOv8 model to detect products and the customer in the live video feed.
+ * Custom Classification Model:
+   - Developed a custom classification model on top of YOLO to accurately classify detected products.
+   - Training involved extensive data augmentation to handle variations in lighting, angles, and product orientations.
+ * Training and Testing:
+   - Created custom datasets for training and testing.
+   - Fine-tuned model parameters, including learning rate, batch size, and architecture, to achieve high accuracy.
+ * Real-Time Tracking and Invoice Generation:
+   - Processed live video input to track the customer and their interactions with products.
+   - Added detected products to a virtual invoice, updating the total bill in real-time.
+
 ## Screenshots
 
 **1. Model Performance:**
