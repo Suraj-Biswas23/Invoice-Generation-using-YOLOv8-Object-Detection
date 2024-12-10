@@ -2,6 +2,25 @@
 
 This project utilizes object detection and classification models to identify products in real-time using a webcam. The system employs YOLOv8 for detecting items and a custom-trained neural network to classify products. Detected items are displayed along with their prices in a real-time invoice, allowing users to view and track their total bill. The application is designed to help automate the process of shopping or inventory management by recognizing and calculating the cost of products detected on camera.
 
+# Problem Statement
+In traditional retail environments, customers must manually pick items, proceed to a cashier or self-checkout, and handle payments—often leading to long wait times and inefficiencies. The aim is to automate this process in unmanned stores, enabling a seamless shopping experience where products are automatically added to an invoice on the app as customers interact with shelves, removing the need for shop personnel.
+
+# Solution
+Our solution is a Smart Invoice Detection System that leverages advanced computer vision techniques to track both the customer and the items they interact with. The system identifies products in real-time using object detection and classification, generating an invoice as items are picked. This eliminates the need for cashiers, allowing customers to pay directly and leave without manual intervention.
+
+# Tech Stack
+ - Programming Language: Python
+ - Libraries and Frameworks:
+   * OpenCV: For image processing and video feed management
+   * YOLO (You Only Look Once): For real-time object detection
+   * TensorFlow/Keras: For training and deploying the custom classification model
+   * NumPy: For numerical computations
+ - Model Files:
+   * Custom Model Training Script: CV_Model_Train.py
+   * Model Architecture and Weights:
+     * full_model.h5
+     * custom_model.weights.h5
+
 ## Screenshots
 
 **1. Model Performance:**
