@@ -16,7 +16,7 @@ Our solution is a Smart Invoice Detection System that leverages advanced compute
    * TensorFlow/Keras: For training and deploying the custom classification model
    * NumPy: For numerical computations
  - Model Files:
-   * Custom Model Training Script: CV_Model_Train.py
+   * Custom Model Training Script: CV_Model_Train.ipynb
    * Model Architecture and Weights:
      * full_model.h5
      * custom_model.weights.h5
